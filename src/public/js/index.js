@@ -21,4 +21,34 @@ Swal.fire({
 })
 .then(result => {
     user = result.value;
+    socket.emit("authenticated", user);
 });
+
+chatBox.addEventListener("keyup", e => {
+    if(e.key === "Enter"){
+        if(chatBox.value.trim().length > 0){
+            socket.emit("message", {user, message: chatBox.value});
+            chatBox.value = "";
+        }
+    }
+})
+
+socket.on("messageLogs", data => {
+    let logs = document.getElementById("messageLogs");
+    let messages = "";
+    data.forEach(msg => {
+        messages += `${msg.user} dice: ${msg.message}<br/>`;
+    });
+    logs.innerHTML = messages;
+})
+
+socket.on("newUserConnected", data => {
+    Swal.fire({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        title: `${data} se ha unido al chat`,
+        icon: "success"
+    })
+})
